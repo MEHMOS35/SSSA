@@ -1,0 +1,163 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("MEHMOS AUTO WIN", "DarkTheme")
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+repeat task.wait() until workspace.CurrentCamera
+
+-- Target CFrame
+local targetCFrame = CFrame.new(3464.39404, 215.08305, 40.72865, -0.00872680, 0.06688055, -0.99772280, 0.00000001, 0.99776083, 0.06688310, 0.99772280, 0.00058348, -0.00869037)
+
+-- Variables
+local autoWinEnabled = false
+local autoWinConnection = nil
+local autoRebirthEnabled = false
+local autoRebirthConnection = nil
+
+-- Functions
+local function startAutoWin()
+    if autoWinConnection then return end
+    
+    autoWinConnection = RunService.Heartbeat:Connect(function()
+        local character = LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        local camera = workspace.CurrentCamera
+        
+        if humanoid and rootPart and camera then
+            rootPart.CFrame = targetCFrame
+            local lookVector = camera.CFrame.LookVector
+            humanoid:Move(Vector3.new(lookVector.X, 0, lookVector.Z), true)
+        end
+    end)
+end
+
+local function stopAutoWin()
+    if autoWinConnection then
+        autoWinConnection:Disconnect()
+        autoWinConnection = nil
+    end
+end
+
+local function toggleAutoWin()
+    autoWinEnabled = not autoWinEnabled
+    
+    if autoWinEnabled then
+        startAutoWin()
+        Library:Notify("Auto Win Activated", "Success", 3)
+    else
+        stopAutoWin()
+        Library:Notify("Auto Win Deactivated", "Warning", 3)
+    end
+end
+
+local function attemptRebirth()
+    local success, err = pcall(function()
+        ReplicatedStorage.Network.Rebirth.AttemptRebirth:FireServer()
+    end)
+    
+    if not success then
+        warn("Auto Rebirth Error:", err)
+    end
+    
+    return success
+end
+
+local function startAutoRebirth()
+    if autoRebirthConnection then return end
+    
+    local lastAttempt = 0
+    autoRebirthConnection = RunService.Heartbeat:Connect(function()
+        local currentTime = tick()
+        -- Limit to once per second to avoid spam
+        if currentTime - lastAttempt >= 1 then
+            lastAttempt = currentTime
+            attemptRebirth()
+        end
+    end)
+end
+
+local function stopAutoRebirth()
+    if autoRebirthConnection then
+        autoRebirthConnection:Disconnect()
+        autoRebirthConnection = nil
+    end
+end
+
+local function toggleAutoRebirth()
+    autoRebirthEnabled = not autoRebirthEnabled
+    
+    if autoRebirthEnabled then
+        startAutoRebirth()
+        Library:Notify("Auto Rebirth Activated", "Success", 3)
+    else
+        stopAutoRebirth()
+        Library:Notify("Auto Rebirth Deactivated", "Warning", 3)
+    end
+end
+
+-- Create Main Tab
+local MainTab = Window:NewTab("Main")
+local MainSection = MainTab:NewSection("Auto Win System")
+
+-- Auto Win Toggle
+MainSection:NewToggle("Auto Win", "Toggle automatic win system", function(state)
+    autoWinEnabled = state
+    
+    if autoWinEnabled then
+        startAutoWin()
+        Library:Notify("Auto Win Activated", "Success", 3)
+    else
+        stopAutoWin()
+        Library:Notify("Auto Win Deactivated", "Warning", 3)
+    end
+end)
+
+-- Auto Rebirth Toggle
+MainSection:NewToggle("Auto Rebirth", "Toggle automatic rebirth", function(state)
+    autoRebirthEnabled = state
+    
+    if autoRebirthEnabled then
+        startAutoRebirth()
+        Library:Notify("Auto Rebirth Activated", "Success", 3)
+    else
+        stopAutoRebirth()
+        Library:Notify("Auto Rebirth Deactivated", "Warning", 3)
+    end
+end)
+
+-- Manual Rebirth Button
+MainSection:NewButton("Rebirth Once", "Attempt rebirth manually", function()
+    local success = attemptRebirth()
+    if success then
+        Library:Notify("Rebirth Attempted", "FireServer sent!", 2)
+    else
+        Library:Notify("Rebirth Failed", "Check console", 2)
+    end
+end)
+
+-- Keybinds
+MainSection:NewKeybind("Toggle Auto Win", "Press E to toggle Auto Win", Enum.KeyCode.E, function()
+    toggleAutoWin()
+end)
+
+MainSection:NewKeybind("Toggle Auto Rebirth", "Press R to toggle Auto Rebirth", Enum.KeyCode.R, function()
+    toggleAutoRebirth()
+end)
+
+-- Info Section
+local InfoTab = Window:NewTab("Info")
+local InfoSection = InfoTab:NewSection("Information")
+
+InfoSection:NewLabel("Script by MEHMOS35")
+InfoSection:NewLabel("Press E to toggle Auto Win")
+InfoSection:NewLabel("Press R to toggle Auto Rebirth")
+
+
+-- Success notification
+Library:Notify("Mehmos Script Loaded", "Successfully loaded!", 3)
