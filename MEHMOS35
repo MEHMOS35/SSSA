@@ -10,8 +10,8 @@ local LocalPlayer = Players.LocalPlayer
 
 repeat task.wait() until workspace.CurrentCamera
 
--- Target CFrame
-local targetCFrame = CFrame.new(3464.39404, 215.08305, 40.72865, -0.00872680, 0.06688055, -0.99772280, 0.00000001, 0.99776083, 0.06688310, 0.99772280, 0.00058348, -0.00869037)
+-- Target CFrame (DAHA AŞAĞIDA)
+local targetCFrame = CFrame.new(3841.52, 210.46, 39.72)
 
 -- Variables
 local autoWinEnabled = false
