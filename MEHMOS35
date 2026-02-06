@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 
 repeat task.wait() until workspace.CurrentCamera
 
--- Target CFrame (DAHA AŞAĞIDA)
+-- Target CFrame 
 local targetCFrame = CFrame.new(3841.52, 210.46, 39.72)
 
 -- Variables
